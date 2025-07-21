@@ -29,11 +29,11 @@ const Hero = () => {
         </div>
         
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 max-w-4xl">
-          Upload & Analyze Instantly
+          AI-Powered Food Analysis
         </h1>
         
         <p className="text-xl text-gray-600 mb-8 max-w-2xl">
-          Our AI recognizes food items and provides detailed calorie breakdowns
+          Upload food images and get instant nutritional analysis with detailed predictions
         </p>
         
         <Link 

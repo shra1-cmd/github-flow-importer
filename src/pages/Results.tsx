@@ -22,11 +22,11 @@ const Results = () => {
 
   const fetchUserImages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('uploaded_images')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('food_uploads')
+      .select('*')
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false });
 
       if (error) throw error;
       setImages(data || []);
@@ -60,8 +60,8 @@ const Results = () => {
           <div className="grid gap-6">
             {images.map((image) => (
               <div key={image.id} className="bg-white rounded-3xl shadow-lg p-8">
-                <img src={image.image_url} alt={image.image_name} className="w-full h-48 object-cover rounded-lg mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{image.image_name}</h3>
+                <img src={image.image_url} alt={image.original_filename} className="w-full h-48 object-cover rounded-lg mb-4" />
+                <h3 className="text-xl font-semibold mb-2">{image.original_filename}</h3>
                 <p className="text-gray-600">Status: {image.analysis_status}</p>
               </div>
             ))}

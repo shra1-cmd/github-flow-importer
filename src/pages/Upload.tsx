@@ -86,11 +86,11 @@ const Upload = () => {
 
       // Save image info to database
       const { error: dbError } = await supabase
-        .from('uploaded_images')
+        .from('food_uploads')
         .insert({
           user_id: user.id,
           image_url: urlData.publicUrl,
-          image_name: selectedFile.name,
+          original_filename: selectedFile.name,
           file_size: selectedFile.size,
         });
 

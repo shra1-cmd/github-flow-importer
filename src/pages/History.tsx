@@ -22,11 +22,11 @@ const History = () => {
 
   const fetchUserHistory = async () => {
     try {
-      const { data, error } = await supabase
-        .from('uploaded_images')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('food_uploads')
+      .select('*')
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false });
 
       if (error) throw error;
       setImages(data || []);
@@ -60,9 +60,9 @@ const History = () => {
           <div className="space-y-4">
             {images.map((image) => (
               <div key={image.id} className="bg-white rounded-2xl shadow-lg p-6 flex items-center space-x-4">
-                <img src={image.image_url} alt={image.image_name} className="w-16 h-16 object-cover rounded-lg" />
+                <img src={image.image_url} alt={image.original_filename} className="w-16 h-16 object-cover rounded-lg" />
                 <div className="flex-1">
-                  <h3 className="font-semibold">{image.image_name}</h3>
+                  <h3 className="font-semibold">{image.original_filename}</h3>
                   <p className="text-sm text-gray-600">{new Date(image.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">

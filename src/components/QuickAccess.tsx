@@ -21,9 +21,9 @@ const QuickAccess = () => {
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                   <Camera size={24} className="text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Image</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Image Prediction</h3>
                 <p className="text-gray-600 text-sm">
-                  Snap a photo of your meal and get instant nutrition analysis
+                  Upload food images and get AI-powered nutritional predictions instantly
                 </p>
               </div>
             </Link>
@@ -33,9 +33,9 @@ const QuickAccess = () => {
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                   <Camera size={24} className="text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Image</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Image Prediction</h3>
                 <p className="text-gray-600 text-sm">
-                  Sign in to upload and analyze your meals
+                  Sign in to upload and get AI-powered food analysis
                 </p>
               </div>
             </Link>
@@ -48,7 +48,7 @@ const QuickAccess = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">View History</h3>
               <p className="text-gray-600 text-sm">
-                {user ? "Track your nutrition journey and see your progress over time" : "Sign in to view your nutrition history"}
+                {user ? "Access your complete history of food predictions and analysis" : "Sign in to view your prediction history"}
               </p>
             </div>
           </Link>
@@ -58,9 +58,9 @@ const QuickAccess = () => {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
                 <BarChart3 size={24} className="text-purple-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Analysis Results</h3>
               <p className="text-gray-600 text-sm">
-                {user ? "Get detailed insights about your nutritional patterns and trends" : "Sign in to view your nutrition analytics"}
+                {user ? "View detailed results from your food image predictions" : "Sign in to view your analysis results"}
               </p>
             </div>
           </Link>
@@ -72,7 +72,7 @@ const QuickAccess = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile</h3>
               <p className="text-gray-600 text-sm">
-                {user ? "Customize your goals and preferences for personalized recommendations" : "Sign in to manage your profile and settings"}
+                {user ? "Manage your profile settings and account preferences" : "Sign in to access your profile"}
               </p>
             </div>
           </Link>
