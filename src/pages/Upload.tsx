@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Camera, Upload as UploadIcon } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { ApiService } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -69,39 +69,14 @@ const Upload = () => {
 
     setUploading(true);
     try {
-      // Upload to Supabase Storage
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('user-images')
-        .upload(fileName, selectedFile);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('user-images')
-        .getPublicUrl(fileName);
-
-      // Save image info to database
-      const { error: dbError } = await supabase
-        .from('food_uploads')
-        .insert({
-          user_id: user.id,
-          image_url: urlData.publicUrl,
-          original_filename: selectedFile.name,
-          file_size: selectedFile.size,
-        });
-
-      if (dbError) throw dbError;
+      const result = await ApiService.predict(selectedFile);
 
       toast({
         title: "Success!",
-        description: "Image uploaded successfully",
+        description: "Image uploaded and analyzed successfully",
       });
 
-      // Navigate to results page or reset form
+      // Reset form
       setSelectedFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';

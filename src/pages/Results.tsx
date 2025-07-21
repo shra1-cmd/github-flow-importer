@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ChefHat, Clock, Users, Star } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { ApiService } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 
 const Results = () => {
@@ -22,13 +22,7 @@ const Results = () => {
 
   const fetchUserImages = async () => {
     try {
-    const { data, error } = await supabase
-      .from('food_uploads')
-      .select('*')
-      .eq('user_id', user?.id)
-      .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await ApiService.getResults();
       setImages(data || []);
     } catch (error) {
       console.error('Error fetching images:', error);

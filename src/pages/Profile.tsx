@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User, Mail, Calendar, Award, Settings, Camera } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { ApiService } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
@@ -22,13 +22,7 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user?.id)
-      .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
+      const data = await ApiService.getProfile();
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);

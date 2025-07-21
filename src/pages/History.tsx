@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, TrendingUp, Apple, Target } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { ApiService } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 
 const History = () => {
@@ -22,13 +22,7 @@ const History = () => {
 
   const fetchUserHistory = async () => {
     try {
-    const { data, error } = await supabase
-      .from('food_uploads')
-      .select('*')
-      .eq('user_id', user?.id)
-      .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await ApiService.getHistory();
       setImages(data || []);
     } catch (error) {
       console.error('Error fetching history:', error);
