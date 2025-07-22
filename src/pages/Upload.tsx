@@ -91,13 +91,13 @@ const Upload = () => {
       });
 
       toast({
-        title: "Success!",
+        title: "✅ Upload successful!",
         description: "Image analyzed successfully with both methods",
       });
 
     } catch (error: any) {
       toast({
-        title: "Upload failed",
+        title: "❌ Upload failed",
         description: error.message,
         variant: "destructive",
       });

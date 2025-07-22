@@ -25,8 +25,15 @@ export class ApiService {
     const formData = new FormData();
     formData.append('file', imageFile);
 
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${this.baseUrl}/predict`, {
       method: 'POST',
+      headers,
       body: formData,
     });
 
@@ -42,14 +49,28 @@ export class ApiService {
     const formData = new FormData();
     formData.append('file', imageFile);
 
-    const response = await fetch(`${this.baseUrl}/predict-image`, {
+    const token = localStorage.getItem('access_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${this.baseUrl}/predict-image/`, {
       method: 'POST',
+      headers,
       body: formData,
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || 'Prediction stream failed');
+      const errorText = await response.text();
+      let errorMessage = 'Prediction stream failed';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.detail || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
