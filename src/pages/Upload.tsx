@@ -6,20 +6,16 @@ import { ApiService } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
-interface PredictResult {
-  item_name: string;
-  confidence: number;
-  cost: number;
+interface PredictImageResult {
+  [key: string]: any; // Allow any response format from the backend
 }
 
 const Upload = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [results, setResults] = useState<{
-    jsonResult: PredictResult | null;
-    streamResult: string | null;
-  }>({ jsonResult: null, streamResult: null });
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<PredictImageResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -64,7 +60,8 @@ const Upload = () => {
     }
 
     setSelectedFile(file);
-    setResults({ jsonResult: null, streamResult: null }); // Clear previous results
+    setSelectedImageUrl(URL.createObjectURL(file));
+    setResult(null); // Clear previous results
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,20 +76,14 @@ const Upload = () => {
 
     setUploading(true);
     try {
-      // Call both APIs simultaneously
-      const [jsonResult, streamResult] = await Promise.all([
-        ApiService.predict(selectedFile),
-        ApiService.predictStream(selectedFile)
-      ]);
-
-      setResults({
-        jsonResult,
-        streamResult
-      });
+      // Call only the predict-image endpoint
+      const response = await ApiService.predictStream(selectedFile);
+      
+      setResult(response);
 
       toast({
         title: "✅ Upload successful!",
-        description: "Image analyzed successfully with both methods",
+        description: "Image analyzed successfully",
       });
 
     } catch (error: any) {
@@ -108,7 +99,8 @@ const Upload = () => {
 
   const resetUpload = () => {
     setSelectedFile(null);
-    setResults({ jsonResult: null, streamResult: null });
+    setSelectedImageUrl(null);
+    setResult(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -173,105 +165,108 @@ const Upload = () => {
           </div>
         </div>
 
-        {selectedFile && !results.jsonResult && !results.streamResult && (
+        {selectedFile && !result && (
           <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Camera size={32} className="text-green-500" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Image Selected</h3>
-              <p className="text-gray-500 mb-4">
-                {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-              </p>
-              <button
-                onClick={uploadImage}
-                disabled={uploading}
-                className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-8 py-3 rounded-full font-semibold hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50"
-              >
-                {uploading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline mr-2"></div>
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <UploadIcon size={20} className="inline mr-2" />
-                    Upload & Analyze
-                  </>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Input Image Preview */}
+              <div className="text-center">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Selected Image</h3>
+                {selectedImageUrl && (
+                  <img 
+                    src={selectedImageUrl} 
+                    alt="Selected image" 
+                    className="w-full max-w-md mx-auto rounded-2xl shadow-lg"
+                  />
                 )}
-              </button>
+                <p className="text-gray-500 mt-4">
+                  {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              </div>
+
+              {/* Upload Button */}
+              <div className="flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Camera size={32} className="text-green-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-6">Ready to Analyze</h3>
+                  <button
+                    onClick={uploadImage}
+                    disabled={uploading}
+                    className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-8 py-3 rounded-full font-semibold hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline mr-2"></div>
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <UploadIcon size={20} className="inline mr-2" />
+                        Upload & Analyze
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* Results Display */}
-        {(results.jsonResult || results.streamResult) && (
+        {result && (
           <div className="space-y-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={32} className="text-green-500" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Analysis Complete!</h2>
-              <p className="text-gray-600">Here are your results from both analysis methods:</p>
+              <p className="text-gray-600">Here are your analysis results:</p>
             </div>
 
-            {/* JSON Result */}
-            {results.jsonResult && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Input Image */}
               <div className="bg-white rounded-3xl shadow-lg p-8">
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center">
-                    <CheckCircle size={24} className="text-blue-500 mr-2" />
-                    Detailed Analysis (JSON)
-                  </h3>
-                  <p className="text-gray-600">Structured data with confidence and cost information</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6 text-center">
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Camera size={24} className="text-white" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Item Name</h4>
-                    <p className="text-blue-600 font-medium text-lg">{results.jsonResult.item_name}</p>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6 text-center">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Percent size={24} className="text-white" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Confidence</h4>
-                    <p className="text-green-600 font-medium text-lg">{(results.jsonResult.confidence * 100).toFixed(1)}%</p>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl p-6 text-center">
-                    <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <DollarSign size={24} className="text-white" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Estimated Cost</h4>
-                    <p className="text-purple-600 font-medium text-lg">${results.jsonResult.cost.toFixed(2)}</p>
-                  </div>
-                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <UploadIcon size={24} className="text-blue-500 mr-2" />
+                  Input Image
+                </h3>
+                {selectedImageUrl && (
+                  <img 
+                    src={selectedImageUrl} 
+                    alt="Input image" 
+                    className="w-full rounded-2xl shadow-lg"
+                  />
+                )}
               </div>
-            )}
 
-            {/* Stream Result */}
-            {results.streamResult && (
+              {/* Response Data */}
               <div className="bg-white rounded-3xl shadow-lg p-8">
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center">
-                    <CheckCircle size={24} className="text-green-500 mr-2" />
-                    Stream Analysis
-                  </h3>
-                  <p className="text-gray-600">Raw streaming response with detailed description</p>
-                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <CheckCircle size={24} className="text-green-500 mr-2" />
+                  Analysis Result
+                </h3>
                 
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
-                  <div className="prose max-w-none">
-                    <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">{results.streamResult}</p>
+                {/* Check if response contains an image URL/base64 */}
+                {result.image && (
+                  <div className="mb-6">
+                    <img 
+                      src={result.image} 
+                      alt="Analysis result" 
+                      className="w-full rounded-2xl shadow-lg mb-4"
+                    />
                   </div>
+                )}
+
+                {/* Display JSON response */}
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
+                  <h4 className="font-semibold text-gray-900 mb-3">Response Data:</h4>
+                  <pre className="text-sm text-gray-800 whitespace-pre-wrap overflow-auto max-h-96">
+                    {JSON.stringify(result, null, 2)}
+                  </pre>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Action Buttons */}
             <div className="text-center">
@@ -286,7 +281,7 @@ const Upload = () => {
           </div>
         )}
 
-        {!selectedFile && !results.jsonResult && !results.streamResult && (
+        {!selectedFile && !result && (
           <div className="bg-white rounded-3xl shadow-lg p-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
