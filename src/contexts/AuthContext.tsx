@@ -46,9 +46,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await ApiService.login(email, password);
       
-      if (response.user) {
-        setUser(response.user);
-        localStorage.setItem('user', JSON.stringify(response.user));
+      if (response.access_token && response.user_id) {
+        // Create user object from backend response
+        const user = {
+          id: response.user_id,
+          email: email, // We know the email from the form
+        };
+        
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('access_token', response.access_token);
         return {};
       } else {
         return { error: 'Invalid response from server' };
@@ -61,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async (): Promise<void> => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('access_token');
   };
 
   const value = {
